@@ -4,23 +4,28 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-    public Transform camTransform;
+    public Camera cam;
 
     // Movement Variables
+    private Vector3 moveVec;
     private float moveSpeed = 5f;
     private float rotationSpeed = 1f;
     private Rigidbody rb;
 
     // Jump Variables
-    private float jumpSpeed = 8.0f;
-    private float gravity = 20.0f;
+    private float distToGround;
+    private float jumpSpeed = 20.0f;
+    private float jumpForce = 4.0f;
+    private Vector3 jump;
+    private float gravity = 10.0f;
     private bool singleJump = false;
-    private bool doubleJump = false;
 
 	// Use this for initialization
 	void Start () {
         rb = GetComponent<Rigidbody>();
-	}
+        distToGround = gameObject.GetComponent<Collider>().bounds.extents.y;
+        jump = new Vector3(0.0f, 2.0f, 0.0f);
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -29,48 +34,41 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKey(KeyCode.W))
         {
             // Move Forward
-            moveDir += camTransform.forward;
-            gameObject.transform.forward = camTransform.forward;
+            moveVec = new Vector3(cam.transform.forward.x, gameObject.transform.right.y, cam.transform.forward.z);
+            moveDir += moveVec;
+            gameObject.transform.forward = new Vector3(cam.transform.forward.x, gameObject.transform.right.y, cam.transform.forward.z);
 
         }
         if (Input.GetKey(KeyCode.S))
         {
             // Move Backward
-            moveDir += -camTransform.forward;
-            gameObject.transform.forward = camTransform.forward;
+            moveVec = new Vector3(cam.transform.forward.x, gameObject.transform.right.y, cam.transform.forward.z);
+            moveDir -= moveVec;
+            gameObject.transform.forward = new Vector3(cam.transform.forward.x, gameObject.transform.right.y, cam.transform.forward.z);
         }
         if (Input.GetKey(KeyCode.A))
         {
             // Move to the Left
-            moveDir += -camTransform.right;
-            gameObject.transform.forward = -camTransform.right;
+            moveDir += -cam.transform.right;
+            gameObject.transform.forward = new Vector3(-cam.transform.right.x, gameObject.transform.right.y, -cam.transform.right.z);
         }
         if (Input.GetKey(KeyCode.D))
         {
             // Move to the Right
-            moveDir += camTransform.right;
-            gameObject.transform.forward = camTransform.right;
+            moveDir += cam.transform.right;
+            gameObject.transform.forward = new Vector3(cam.transform.right.x, gameObject.transform.right.y, cam.transform.right.z);
         }
-        //moveDir.y = moveDir.y -= gravity * Time.deltaTime; ;
-        moveDir.y = 0;
+
+        if (!IsGrounded())
+        {
+            //moveDir.y -= gravity * Time.deltaTime * Time.deltaTime;
+            singleJump = false;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // Jump
-            if (!doubleJump)
-            {
-                if (singleJump)
-                {
-                    moveDir.y = jumpSpeed;
-                    singleJump = false;
-                    doubleJump = true;
-                }
-                else
-                {
-                    moveDir.y = jumpSpeed;
-                    singleJump = true;
-                }
-            }
+            rb.AddForce(jump * jumpForce, ForceMode.Impulse);
         }
         transform.position += moveDir.normalized * moveSpeed * Time.deltaTime;
 
@@ -78,5 +76,11 @@ public class PlayerController : MonoBehaviour {
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(moveDir), rotationSpeed * Time.deltaTime);
         }
+    }
+
+    bool IsGrounded()
+    {
+        Debug.Log(Physics.Raycast(transform.position, -gameObject.transform.up, distToGround + 0.1f));
+        return Physics.Raycast(transform.position, -gameObject.transform.up, distToGround + 0.1f);
     }
 }

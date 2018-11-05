@@ -40,18 +40,19 @@ public class CharController : MonoBehaviour {
                 moveDirection.y = jumpSpeed;
             }
         }
-        //else
-        //{
-        //    if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-        //    {
-        //        gameObject.transform.forward = new Vector3(cam.transform.forward.x, gameObject.transform.forward.y, cam.transform.forward.z);
-        //    }
-        //    moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        //    moveDirection = transform.TransformDirection(moveDirection);
+        else
+        {
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
+            {
+                gameObject.transform.forward = new Vector3(cam.transform.forward.x, gameObject.transform.forward.y, cam.transform.forward.z);
+            }
+            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            moveDirection = transform.TransformDirection(moveDirection);
 
-        //    moveDirection.x *= jumpMove;
-        //    moveDirection.z *= jumpMove;
-        //}
+            //moveDirection.x *= jumpMove;
+            //moveDirection.z *= jumpMove;
+            moveDirection *= jumpMove;
+        }
 
         // Final player Movement
         moveDirection.y -= gravity*gravity * Time.deltaTime;

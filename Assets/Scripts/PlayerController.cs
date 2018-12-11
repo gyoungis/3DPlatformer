@@ -15,10 +15,13 @@ public class PlayerController : MonoBehaviour {
     // Jump Variables
     private float distToGround;
     private float jumpSpeed = 20.0f;
-    private float jumpForce = 4.0f;
+    private float jumpForce = 5.0f;
     private Vector3 jump;
-    private float gravity = 10.0f;
+    private float gravity = 12.0f;
     private bool singleJump = false;
+
+    // Top hit variables
+    private float topForce = 1.0f;
 
 	// Use this for initialization
 	void Start () {
@@ -61,15 +64,21 @@ public class PlayerController : MonoBehaviour {
 
         if (!IsGrounded())
         {
-            //moveDir.y -= gravity * Time.deltaTime * Time.deltaTime;
             singleJump = false;
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (IsGrounded())
         {
-            // Jump
-            rb.AddForce(jump * jumpForce, ForceMode.Impulse);
+            // First jump only if grounded
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // Jump
+                rb.AddForce(jump * jumpForce, ForceMode.Impulse);
+            }
         }
+        //if (IsAbove())
+        //{
+        //    rb.AddForce(jump * -topForce, ForceMode.Impulse);
+        //}
         transform.position += moveDir.normalized * moveSpeed * Time.deltaTime;
 
         if (moveDir != Vector3.zero)
@@ -80,7 +89,15 @@ public class PlayerController : MonoBehaviour {
 
     bool IsGrounded()
     {
-        Debug.Log(Physics.Raycast(transform.position, -gameObject.transform.up, distToGround + 0.1f));
+        // Checks if the player is touching the ground
         return Physics.Raycast(transform.position, -gameObject.transform.up, distToGround + 0.1f);
+    }
+
+    bool IsAbove()
+    {
+        // Checks if the player hits something with head
+        Vector3 offSet = new Vector3(0, 2, 0);
+        Debug.Log(Physics.Raycast(transform.position + offSet, gameObject.transform.up, distToGround + 0.1f));
+        return Physics.Raycast(transform.position, gameObject.transform.up, distToGround + 0.1f);
     }
 }
